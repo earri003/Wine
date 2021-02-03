@@ -57,14 +57,14 @@ def get_regions(df: pd.DataFrame) -> Dict:
 def get_variety(df: pd.DataFrame) -> Dict:
     # print (df['country'])
     df1 = df[df['variety'].str.contains("Pinot Noir")] 
-    # return (df1)
+    return (df1)
     # print(df1['variety'])
 
 #Getting dataframes based off the types  of wine
 def get_winery(df: pd.DataFrame) -> Dict:
     # print (df['country'])
     df1 = df[df['winery'].str.contains("Roco")] 
-    # return (df1)
+    return (df1)
     print(df1)
 
 
@@ -81,8 +81,8 @@ def main():
     price=get_price(df)
     province=get_province(df)
     get_regions(df) #not finished
-    get_variety(df)
-    get_winery(df)
+    variety=get_variety(df)
+    winery=get_winery(df)
 
     
 
