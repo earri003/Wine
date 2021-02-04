@@ -27,14 +27,11 @@ def load_wine_data(path: pathlib.Path) -> pd.DataFrame:
     merged_df['taster_name']= merged_df['taster_name'].fillna('Unknown')
     merged_df['title']= merged_df['title'].fillna('Unknown')
     merged_df['description']= merged_df['description'].fillna('Unknown')
-    merged_df = merged_df.drop(['region_2', 'taster_twitter_handle', 'designation'], 1)
-    # print(merged_df)
+    merged_df = merged_df.drop(["region_1",'region_2', 'taster_twitter_handle', 'designation'], 1)
     return (merged_df)
 
 #Getting dataframes based off the country
 def get_country(df: pd.DataFrame, country) -> Dict:
-    # print (df['country'])
-    # df1 = df[df['country'].str.contains(country)] 
     df1 = df[df['country'].str.contains(country)] 
     # df1.country
     #print(df1['country'])
@@ -61,13 +58,6 @@ def get_province(df: pd.DataFrame, providence) -> Dict:
     return (df1)
     # print(df1)
 
-#Getting dataframes based off the regions
-def get_regions(df: pd.DataFrame) -> Dict:
-    # print (df['country'])
-    df1 = df[df['region_1'].str.contains("Napa Valley")] 
-    # return (df1)
-    # print(df1['region_1'])
-
 #Getting dataframes based off the types  of wine
 def get_variety(df: pd.DataFrame, variety) -> Dict:
     # print (df['country'])
@@ -89,10 +79,6 @@ def get_taster_name(df: pd.DataFrame, name) -> Dict:
     # print(df1)
     return (df1)
 
-
-def country_chosen(df: pd.DataFrame) -> Dict:
-    print(df['country'])
-    pass
 
 def show_graphs(df: pd.DataFrame, args_i) -> Dict:
 
@@ -174,8 +160,6 @@ def main():
         graphs_arg  =  args.graphs
         show_graphs(df, graphs_arg)
         print('Shown graph of : ', args.graphs )
-
-    get_regions(df) #not finished
 
 
 if __name__ == "__main__":
