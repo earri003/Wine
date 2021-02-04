@@ -1,4 +1,5 @@
 import pathlib
+import argparse
 import os 
 from typing import Union, Dict
 import pandas as pd 
@@ -29,30 +30,30 @@ def load_wine_data(path: pathlib.Path) -> pd.DataFrame:
     return (merged_df)
 
 #Getting dataframes based off the country
-def get_country(df: pd.DataFrame) -> Dict:
+def get_country(df: pd.DataFrame, country) -> Dict:
     # print (df['country'])
-    df1 = df[df['country'].str.contains("US")] 
+    df1 = df[df['country'].str.contains(country)] 
     #print(df1['country'])
     return (df1)
 
 #Getting dataframes based off the scores
-def get_score(df: pd.DataFrame) -> Dict:
+def get_score(df: pd.DataFrame, points) -> Dict:
     # print (df['country'])
-    df1=df[df['points'].isin(['94'])]
+    df1=df[df['points'].isin([points])]
     #print(df1['points'])
     return (df1)
 
 #Getting dataframes based off the price
-def get_price(df: pd.DataFrame) -> Dict:
+def get_price(df: pd.DataFrame, price) -> Dict:
     df['price'] = df['price'].astype('int64') 
-    df1=df[df['price'].isin(['20'])]
+    df1=df[df['price'].isin([price])]
     return (df1)
     # print(df1['price'])
 
 #Getting dataframes based off the province
-def get_province(df: pd.DataFrame) -> Dict:
+def get_province(df: pd.DataFrame, providence) -> Dict:
     # print (df['country'])
-    df1 = df[df['province'].str.contains("California")] 
+    df1 = df[df['province'].str.contains(providence)] 
     return (df1)
     # print(df1)
 
@@ -92,11 +93,62 @@ def country_chosen(df: pd.DataFrame) -> Dict:
 def main():
     data_path= thisdir.joinpath('data')
     df=load_wine_data(data_path)
-    country=get_country(df)
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--country', type=str)
+    parser.add_argument('--score', type=int)
+    parser.add_argument('--price', type=int)
+    parser.add_argument('--province', type=str)
+    parser.add_argument('--region', type=str)
+    parser.add_argument('--winery', type=str)
+    parser.add_argument('--variety', type=str, nargs='*')
+    parser.add_argument('--taster', type=str)
+    args = parser.parse_args()
+    
+    if args.country:
+        country_arg  =  args.country
+        country=get_country(df,country_arg)
+        print(country)
+        print(args.country, 'was chosen')
+
+    if args.score:
+        score_arg  =  args.score
+        points=get_score(df,score_arg)
+        print(points)
+        print('Points: ', args.score )
+
+    if args.price:
+        price_arg  =  args.price
+        price=get_price(df,price_arg)
+        print(price)
+        print('Price: ', args.price )
+
+    if args.province:
+        province_arg  =  args.province
+        province=get_province(df,province_arg)
+        print(province)
+        print('Providence: ', args.province )
+    if args.region:
+        region_arg  =  args.region
+        print('Region: ', args.region )
+    if args.winery:
+        winery_arg  =  args.winery
+        print('Winery: ', args.winery )
+    if args.variety:
+        variety_arg  =  args.variety
+        print('Variety: ', args.variety)
+    if args.taster:
+        taster_arg  =  args.taster
+        print('Taster  Name: ', args.taster )
+
+    # data_path= thisdir.joinpath('data')
+    # df=load_wine_data(data_path)
+    # country=get_country(df,country_arg)
+    # print(country)
     # country_chosen(country)
-    points=get_score(df)
-    price=get_price(df)
-    province=get_province(df)
+    # points=get_score(df,score_arg)
+    # price=get_price(df,price_arg)
+    # province=get_province(df,providence_arg)
     get_regions(df) #not finished
     variety=get_variety(df)
     winery=get_winery(df)
