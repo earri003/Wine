@@ -1,33 +1,80 @@
 from main import *
 import dash
+import dash_core_components as dcc
 import dash_html_components as html
+from dash.dependencies import Input, Output
+import plotly.express as px
+import plotly.graph_objs as go
+
 import pandas as pd
-
-datapath=data_path= thisdir.joinpath('data')
-df=load_wine_data(datapath)
-print("loaded data")
-
-def generate_table(dataframe, max_rows=100):
-    return html.Table([
-        html.Thead(
-            html.Tr([html.Th(col) for col in dataframe.columns])
-        ),
-        html.Tbody([
-            html.Tr([
-                html.Td(dataframe.iloc[i][col]) for col in dataframe.columns
-            ]) for i in range(min(len(dataframe), max_rows))
-        ])
-    ])
-
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
-app.layout = html.Div(children=[
-    html.H1(children='Wine Reivew Data'),
-    generate_table(df)
+datapath=data_path= thisdir.joinpath('data')
+df=load_wine_data(datapath)
+available_indicators = df.columns
+
+app.layout = html.Div([
+    html.Div([
+
+        html.Div([
+            dcc.Dropdown(
+                id='xaxis-column',
+                options=[{'label': i, 'value': i} for i in available_indicators],
+                value='Country'
+            ),
+        ],
+        style={'width': '48%', 'display': 'inline-block'}),
+
+        html.Div([
+            dcc.Dropdown(
+                id='yaxis-column',
+                options=[{'label': i, 'value': i} for i in ["price", "points"]],
+                value='price'
+            ),
+        ],style={'width': '48%', 'float': 'right', 'display': 'inline-block'})
+    ]),
+    dcc.Graph(id='indicator-graphic')
 ])
+
+@app.callback(
+    Output('indicator-graphic', 'figure'),
+    Input('xaxis-column', 'value'),
+    Input('yaxis-column', 'value'),
+)
+
+def update_graph(xaxis_column_name, yaxis_column_name
+                 ):
+    # print('here')
+    # merged_df.loc[merged_df["country"] == "England", "country"] = "Britain"
+    # df.loc[df.columns==df[]]
+    x=xaxis_column_name.lower()
+    y=yaxis_column_name.lower()
+    # print(x)
+    # df3 = df[[x,y]]
+    # df3 = df.groupby([x, y], as_index=False).median()
+
+    # fig = go.Figure(
+    #     data=[
+    #         go.Bar(
+    #             x=df[xaxis_column_name.lower()], 
+    #             y=df[yaxis_column_name.lower()]
+    #         )
+    #     ],
+    #     layout=dict(
+    #         margin={'l': 40, 'b': 40, 't': 10, 'r': 0}, 
+    #         hovermode='closest'
+    #     )
+    # )
+    _df = df[[x, y]]
+    # fig = px.bar(_df.groupby([x], as_index=False).median(), x=x, y="price")
+    fig = px.box(_df, x=x, y=y, points=False)
+    # fig.update_layout(margin={'l': 40, 'b': 40, 't': 10, 'r': 0}, hovermode='closest')
+
+    return fig
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
