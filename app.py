@@ -14,19 +14,37 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 datapath=data_path= thisdir.joinpath('data')
 df=load_wine_data(datapath)
+print(df.keys)
+df = df.drop(['Unnamed: 0', 'description', 'title'], 1)
 available_indicators = df.columns
+colors = {
+    'background': '#111111',
+    'text': '#7FDBFF'
+}
+app.layout = html.Div(style={'backgroundColor': colors['background']}, children=[
+    html.H1(
+        children='Wine Review Boxplots',
+        style={
+            'textAlign': 'center',
+            'color': colors['text']
+        }
+    ),
 
-app.layout = html.Div([
+    html.Div(children='Dash for BoxPlots', style={
+        'textAlign': 'center',
+        'color': colors['text']
+    }),
     html.Div([
 
         html.Div([
             dcc.Dropdown(
                 id='xaxis-column',
                 options=[{'label': i, 'value': i} for i in available_indicators],
-                value='Country'
+                value='country'
             ),
         ],
         style={'width': '48%', 'display': 'inline-block'}),
+
 
         html.Div([
             dcc.Dropdown(
@@ -37,6 +55,7 @@ app.layout = html.Div([
         ],style={'width': '48%', 'float': 'right', 'display': 'inline-block'})
     ]),
     dcc.Graph(id='indicator-graphic')
+
 ])
 
 @app.callback(
@@ -47,30 +66,12 @@ app.layout = html.Div([
 
 def update_graph(xaxis_column_name, yaxis_column_name
                  ):
-    # print('here')
-    # merged_df.loc[merged_df["country"] == "England", "country"] = "Britain"
-    # df.loc[df.columns==df[]]
     x=xaxis_column_name.lower()
     y=yaxis_column_name.lower()
-    # print(x)
-    # df3 = df[[x,y]]
-    # df3 = df.groupby([x, y], as_index=False).median()
-
-    # fig = go.Figure(
-    #     data=[
-    #         go.Bar(
-    #             x=df[xaxis_column_name.lower()], 
-    #             y=df[yaxis_column_name.lower()]
-    #         )
-    #     ],
-    #     layout=dict(
-    #         margin={'l': 40, 'b': 40, 't': 10, 'r': 0}, 
-    #         hovermode='closest'
-    #     )
-    # )
     _df = df[[x, y]]
     # fig = px.bar(_df.groupby([x], as_index=False).median(), x=x, y="price")
     fig = px.box(_df, x=x, y=y, points=False)
+    # fig.layout.plot_bgcolor = 'black'
     # fig.update_layout(margin={'l': 40, 'b': 40, 't': 10, 'r': 0}, hovermode='closest')
 
     return fig
