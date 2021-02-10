@@ -9,6 +9,7 @@ from pathlib import Path
 from urllib.request import urlopen
 import json
 import country_converter as coco
+from sklearn.preprocessing import OrdinalEncoder
 thisdir = pathlib.Path(__file__).resolve().parent
 savedir= thisdir.joinpath("plots")
 savedir.mkdir(exist_ok=True, parents=True)
@@ -23,27 +24,28 @@ def load_wine_data(path: pathlib.Path) -> pd.DataFrame:
         # df = pd.read_csv(i)
         list_of_dataframes.append(pd.read_csv(i))
     merged_df = pd.concat(list_of_dataframes)
-    merged_df['country'] = merged_df['country'].fillna('Unknown')
-    merged_df['points'] = merged_df['points'].fillna(0)
-    merged_df['price'] = merged_df['price'].fillna(0)
-    merged_df['province'] = merged_df['province'].fillna('Unknown')
-    merged_df['region_1'] = merged_df['region_1'].fillna('Unknown')
-    merged_df['variety'] = merged_df['variety'].fillna('Unknown')
-    merged_df['winery'] = merged_df['winery'].fillna('Unknown')
-    merged_df['taster_name']= merged_df['taster_name'].fillna('Unknown')
-    merged_df['title']= merged_df['title'].fillna('Unknown')
-    merged_df['description']= merged_df['description'].fillna('Unknown')
-
-    merged_df["country"][merged_df["country"] == "England"] = "Britain"
-
-    countries = merged_df["country"][merged_df["country"] != "Unknown"].unique().tolist()
-    convert = dict(zip(countries, cc.convert(countries, to="ISO3")))
-
-    # print(merged_df['country'].tolist())
-    merged_df["iso3"] = merged_df["country"].map(convert)
-    merged_df = merged_df.drop(['region_2', 'taster_twitter_handle', 'designation'], 1)
-    merged_df.drop_duplicates(inplace=True)
     return (merged_df)
+
+def fix_dataframe(df):
+    df['country'] = df['country'].fillna('Unknown')
+    df['points'] = df['points'].fillna(0)
+    df['price'] = df['price'].fillna(0)
+    df['province'] = df['province'].fillna('Unknown')
+    df['region_1'] = df['region_1'].fillna('Unknown')
+    df['variety'] = df['variety'].fillna('Unknown')
+    df['winery'] = df['winery'].fillna('Unknown')
+    df['taster_name']= df['taster_name'].fillna('Unknown')
+    df['title']= df['title'].fillna('Unknown')
+    df['description']= df['description'].fillna('Unknown')
+    df.loc[df["country"] == "England", "country"] = "Britain"
+    countries = df["country"][df["country"] != "Unknown"].unique().tolist()
+    convert = dict(zip(countries, cc.convert(countries, to="ISO3")))
+    # print(merged_df['country'].tolist())
+    df["iso3"] = df["country"].map(convert)
+    df = df.drop(['region_2', 'taster_twitter_handle', 'designation'], 1)
+    df.drop_duplicates(inplace=True)
+    return (df)
+
 
 #Getting dataframes based off the country
 def get_country(df: pd.DataFrame, country) -> Dict:
@@ -94,36 +96,46 @@ def get_taster_name(df: pd.DataFrame, name) -> Dict:
     # print(df1)
     return (df1)
 
+def cleanData(df: pd.DataFrame):
+    df1=df.drop(['Unnamed: 0','designation','description','region_1','region_2','taster_name','taster_twitter_handle','title','iso3'],axis=1)
+    df1=df1.dropna(how='any')
+    return (df1)
+
 
 def show_graphs(df: pd.DataFrame, args_i) -> Dict:
 
-    # df1 = df[["taster_name", "country", "price"]]
-    # df1 = df.groupby(["taster_name", "country"], as_index=False).median()
-
-    # fig1 = px.bar(df1, x="taster_name", y="price", color="country", barmode="group")
-    # fig1.show()
-    # fig1.write_html(str(savedir.joinpath('figure1.pdf')))
+    df1 = df[["taster_name", "country", "price"]]
+    df1 = df.groupby(["taster_name", "country"], as_index=False).median()
+    fig1 = px.bar(df1, x="taster_name", y="price", color="country", barmode="group")
 
     df2 = df[["variety", "points", "price"]]
     df2 = df.groupby(["variety", "points"], as_index=False).median()
     fig2 = px.bar(df2, x="variety", y="points", color="price", barmode="group")
-    fig2.show()
-    fig2.write_html(str(savedir.joinpath('figure2.html')))
-    # df3 = df[["country", "province", "region_1"]]
-    # df3 = df.groupby(["country", "province"], as_index=False).median()
-    # fig3 = px.bar(df3, x="country", y="province", barmode="group")
-    # # fig3.show()
 
-    # fig4 = px.scatter_geo(df, locations="iso3", color="points", hover_name="country", size= "price" , projection="natural earth")
-    # # fig4.show()
+    df3 = df[["country", "province", "region_1"]]
+    df3 = df.groupby(["country", "province"], as_index=False).median()
+    fig3 = px.bar(df3, x="country", y="province", barmode="group")
 
-    # fig2.write_html(str(savedir.joinpath('figure2.png')
-    # fig3.write_html(str(savedir.joinpath('figure3.png')
-    # fig4.write_html(str(savedir.joinpath('figure4.png')
+    fig4 = px.scatter_geo(df, locations="iso3", color="points", hover_name="country", size= "price" , projection="natural earth")
+
+    if args_i=="show":
+        fig1.show()
+        fig2.show()
+        fig3.show()
+        fig4.show()
+    elif args_i=="write":
+        fig1.write_html(str(savedir.joinpath('figure1.html')))
+        fig2.write_html(str(savedir.joinpath('figure2.html')))
+        fig3.write_html(str(savedir.joinpath('figure3.html')))
+        fig4.write_html(str(savedir.joinpath('figure4.html')))
 
 def main():
     data_path= thisdir.joinpath('data')
     df=load_wine_data(data_path)
+    df=fix_dataframe(df)
+    df['price'] = df['price'].astype('int64')
+    # df_ml['price'] = df_ml['price'].astype('int64')
+
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--country', type=str)
@@ -182,7 +194,13 @@ def main():
         graphs_arg  =  args.graphs
         show_graphs(df, graphs_arg)
         print('Shown graph of : ', args.graphs )
-    
+    # print(df.dtypes)
+    # enc = OrdinalEncoder()
+    # df["make_code"] = enc.fit_transform(df[["country"]])
+    # df[["country", "make_code"]].head(11)
+    # print(df)
+    # df.to_csv('testing.csv')
+
 
 
 if __name__ == "__main__":
