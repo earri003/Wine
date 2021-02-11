@@ -1,4 +1,4 @@
-from main import *
+from winos.data import load_wine_data, thisdir, fix_dataframe
 import dash
 import dash_core_components as dcc
 import dash_html_components as html

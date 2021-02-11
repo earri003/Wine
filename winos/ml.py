@@ -9,6 +9,8 @@ from imblearn.under_sampling import RandomUnderSampler
 import pandas as pd
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn import metrics
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 def clean_for_ml(df, u_input):
     df = df.drop(['Unnamed: 0','designation','description','region_1','region_2','taster_name','taster_twitter_handle','title', 'iso3'],axis=1)
@@ -32,16 +34,21 @@ def clean_for_ml(df, u_input):
     # print(df)
     # print(df.country.value_counts())
 
-    X_train, X_test, y_train, y_test=pca(df)
-    
-    if (u_input=='knn'):
-        knn(X_train, X_test, y_train, y_test)
-
-def pca(df):
     X = df.drop('country', 1)
     y = df['country']
-    # print (X,'then  y \n' ,y)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+    Xp_train, Xp_test, yp_train, yp_test=pca(X_train, X_test, y_train, y_test)
+    
+    if (u_input=='knn'):
+        knn(X_train, X_test, y_train, y_test, Xp_train, Xp_test, yp_train, yp_test)
+    elif(u_input=='correlation'):
+        correlation(df)
+
+def pca(X_train, X_test, y_train, y_test):
+    # X = df.drop('country', 1)
+    # y = df['country']
+    # # print (X,'then  y \n' ,y)
+    # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
 
     sc = StandardScaler()
     X_train = sc.fit_transform(X_train)
@@ -52,9 +59,18 @@ def pca(df):
     X_test=pca.transform(X_test)
     return (X_train,X_test,y_train,y_test)
 
-def knn(X_train, X_test, y_train, y_test):
+def knn(X_train, X_test, y_train, y_test, Xp_train, Xp_test, yp_train, yp_test):
     # print(y_train)
-    knn = KNeighborsClassifier(n_neighbors=5)
+    knn = KNeighborsClassifier(n_neighbors=1)
     knn.fit(X_train, y_train)
     y_pred = knn.predict(X_test)
-    print("Accuracy:",metrics.accuracy_score(y_test, y_pred))
+    knn.fit(Xp_train, yp_train)
+    yp_pred = knn.predict(Xp_test)
+    print("Accuracy without PCA:",metrics.accuracy_score(y_test, y_pred))
+    print("Accuracy with PCA:",metrics.accuracy_score(yp_test, yp_pred))
+
+def correlation(df):
+    correlation_mat = df.astype('float').corr()
+    sns.heatmap(correlation_mat, annot = True)
+    plt.show()
+    print(df.corr())
