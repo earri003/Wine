@@ -85,7 +85,6 @@ def tree(X_train, X_test, y_train, y_test, Xp_train, Xp_test, yp_train, yp_test)
     y_pred = clf.predict(X_test)
     print("Accuracy without PCA :",metrics.accuracy_score(y_test, y_pred))
 
-    clf = DecisionTreeClassifier(criterion="entropy", max_depth=15)
     clf= clf.fit(Xp_train, yp_train)
     yp_pred = clf.predict(Xp_test)
-    print("Accuracywith PCA :",metrics.accuracy_score(yp_test, yp_pred))
+    print("Accuracy with PCA :",metrics.accuracy_score(yp_test, yp_pred))
