@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="winos",
-    version="0.0.1",
+    version="0.0.2",
     packages=["winos"],
     install_requires=[
         "pandas",
@@ -10,6 +10,7 @@ setuptools.setup(
         "matplotlib",
         "country-converter",
         "sklearn",
-        "imblearn"
+        "imblearn",
+        "seaborn"
     ]
 )
