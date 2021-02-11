@@ -8,9 +8,11 @@ from sklearn.metrics import accuracy_score
 from imblearn.under_sampling import RandomUnderSampler
 import pandas as pd
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
 from sklearn import metrics
 import seaborn as sns
 import matplotlib.pyplot as plt
+
 
 def clean_for_ml(df, u_input):
     df = df.drop(['Unnamed: 0','designation','description','region_1','region_2','taster_name','taster_twitter_handle','title', 'iso3'],axis=1)
@@ -43,6 +45,8 @@ def clean_for_ml(df, u_input):
         knn(X_train, X_test, y_train, y_test, Xp_train, Xp_test, yp_train, yp_test)
     elif(u_input=='correlation'):
         correlation(df)
+    elif(u_input=='tree'):
+        tree(X_train, X_test, y_train, y_test,Xp_train, Xp_test, yp_train, yp_test)
 
 def pca(X_train, X_test, y_train, y_test):
     # X = df.drop('country', 1)
@@ -66,11 +70,22 @@ def knn(X_train, X_test, y_train, y_test, Xp_train, Xp_test, yp_train, yp_test):
     y_pred = knn.predict(X_test)
     knn.fit(Xp_train, yp_train)
     yp_pred = knn.predict(Xp_test)
-    print("Accuracy without PCA:",metrics.accuracy_score(y_test, y_pred))
-    print("Accuracy with PCA:",metrics.accuracy_score(yp_test, yp_pred))
+    print("Accuracy without PCA: ",metrics.accuracy_score(y_test, y_pred))
+    print("Accuracy with PCA: ",metrics.accuracy_score(yp_test, yp_pred))
 
 def correlation(df):
     correlation_mat = df.astype('float').corr()
     sns.heatmap(correlation_mat, annot = True)
     plt.show()
     print(df.corr())
+
+def tree(X_train, X_test, y_train, y_test, Xp_train, Xp_test, yp_train, yp_test):
+    clf = DecisionTreeClassifier(criterion="entropy", max_depth=15)
+    clf= clf.fit(X_train, y_train)
+    y_pred = clf.predict(X_test)
+    print("Accuracy without PCA :",metrics.accuracy_score(y_test, y_pred))
+
+    clf = DecisionTreeClassifier(criterion="entropy", max_depth=15)
+    clf= clf.fit(Xp_train, yp_train)
+    yp_pred = clf.predict(Xp_test)
+    print("Accuracywith PCA :",metrics.accuracy_score(yp_test, yp_pred))
