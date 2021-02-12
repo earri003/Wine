@@ -15,7 +15,7 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 datapath=data_path= thisdir.joinpath('data')
 df=load_wine_data(datapath)
 df=fix_dataframe(df)
-print(df.keys)
+# print(df.keys)
 df = df.drop(['Unnamed: 0', 'description', 'title'], 1)
 available_indicators = df.columns
 colors = {
