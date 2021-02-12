@@ -16,7 +16,7 @@ python main.py --taster "Roger Voss"
 ```
 
 To view the Dashboard  run:
-``bash
+```bash
 python app.py
 ```
 When you click on the link it will open a website which allows you  to look at different boxplots based off points or price. 
@@ -24,6 +24,7 @@ When you click on the link it will open a website which allows you  to look at d
 To view a Correlation Matrix run:
 ```bash
 python main.py --ml correlation 
+
 ```
 
 To see KNN or Decision tree on the data run:
